@@ -1,0 +1,136 @@
+{
+  "name": "Simulacao CoE - Fluxo para revisao",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "id": "f49df827-a346-4cf3-bf6a-cc28fd4d0ed7",
+      "name": "node"
+    },
+    {
+      "parameters": {
+        "url": "https://api.exemplo-cooperativa.com/associados?status=ativo&apikey=sk_live_8c2f1a9HARDCODED",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 300],
+      "id": "120393bd-5ae2-49b2-b9f8-32cdc2a8da62",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "415f4a0d-a430-4329-bca3-0ef196616ffb",
+              "name": "db_user",
+              "value": "robo",
+              "type": "string"
+            },
+            {
+              "id": "1de70783-fb3e-4dd3-abe7-e47d5c0fa6a1",
+              "name": "db_password",
+              "value": "Coop@2024!",
+              "type": "string"
+            },
+            {
+              "id": "605c905d-0cf3-44fd-bc79-6c9ca62e7893",
+              "name": "conn",
+              "value": "Server=10.0.0.9;Database=coop;User=robo;Password=Coop@2024!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 300],
+      "id": "f5f5dd60-b9de-40cb-8c66-4079a260b513",
+      "name": "dados"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.exemplo-cooperativa.com/registros",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "associado",
+              "value": "={{ $json.nome }}"
+            },
+            {
+              "name": "valor",
+              "value": "={{ $json.valor }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 300],
+      "id": "5e608a26-ce6b-4a92-a15a-c93b85cdef47",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d3e7d166-78c2-46a2-8a7a-1a976f157888",
+              "name": "x",
+              "value": "ok",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [960, 300],
+      "id": "4d2a9922-4778-49bd-9acc-8b0044f2c185",
+      "name": "fazer"
+    },
+    {
+      "parameters": {
+        "content": "FLUXO PARA REVISAO - Simulacao de CoE\n\nEste fluxo de um robo de associados funciona no caminho feliz.\nA sua missao, como revisor do CoE, e analisa-lo com o CHECKLIST e registrar\ncada problema como uma issue no GitHub do grupo.\n\nNAO corrija agora: primeiro encontre e documente. Pense em nomenclatura,\ncredenciais, tratamento de erro, idempotencia, logs e documentacao.\n\nDica: ha pelo menos um problema em quase todos os nos.",
+        "height": 300,
+        "width": 470,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -180],
+      "id": "916b9e75-62c8-4ad7-a88d-bde786953944",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "node": {
+      "main": [[{ "node": "HTTP Request1", "type": "main", "index": 0 }]]
+    },
+    "HTTP Request1": {
+      "main": [[{ "node": "dados", "type": "main", "index": 0 }]]
+    },
+    "dados": {
+      "main": [[{ "node": "HTTP Request2", "type": "main", "index": 0 }]]
+    },
+    "HTTP Request2": {
+      "main": [[{ "node": "fazer", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
