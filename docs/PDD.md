@@ -10,10 +10,11 @@
 |---|---|
 | Nome do processo | **[A CONFIRMAR]** — provável: "Registro de dados de associados ativos da cooperativa". O fluxo se chama "Simulacao CoE - Fluxo para revisao" |
 | Área demandante | Não identificável no fluxo. **[A CONFIRMAR]** — o domínio `exemplo-cooperativa.com` sugere uma cooperativa, mas não a área |
-| Autor do PDD | *(preencher: nome de quem levantou)* |
+| Autor do PDD | Natalia Dias Ribeiro (código 422403) |
 | Data / versão | 11/11/2026 · v0.1 |
-| Prioridade | Não identificável no fluxo |
-| Status | Rascunho |
+| Prioridade | Não identificável no fluxo. **[A CONFIRMAR]** com o demandante (sugestão do autor: *quick win*, pois o fluxo é curto, mas os riscos de segurança exigem correção antes de produção) |
+| Status | Rascunho — pendente de validação pelo demandante e revisão do CoE |
+| Dono / sustentação do robô | Não identificável no fluxo. **[A CONFIRMAR]** — responsável e substituto a definir (ver seção 10) |
 
 ## 2. Objetivo e justificativa
 
@@ -68,7 +69,8 @@ Exceções que o processo **precisa definir** com o demandante (todas **[A CONFI
 | Proteção (LGPD) | **[A CONFIRMAR]** base legal, minimização e retenção. Hoje: dados pessoais ficam no histórico de execuções do n8n sem política definida |
 
 ⚠️ **Ponto crítico (não é regra de negócio, é risco):** o fluxo contém **credenciais em texto puro**
-(chave de API na URL, usuário e senha de banco). Ver `review/` — achados 1 e 2.
+(chave de API na URL do nó `HTTP Request1`; usuário, senha e string de conexão de banco no nó `dados`).
+Valores propositalmente não reproduzidos aqui; se forem reais, devem ser rotacionados.
 
 ## 7. Volume e frequência
 
@@ -87,15 +89,23 @@ demandante. **[A CONFIRMAR]:** tempo manual atual por execução, volume mensal,
 - [ ] Credenciais no cofre do n8n, nada escrito no fluxo.
 - [ ] Logs e trilha de auditoria da execução (o que, quando, resultado), sem CPF/dados sensíveis.
 - [ ] Reexecução não duplica registros (idempotência).
+- [ ] Dados inválidos (sem `nome` ou `valor`) são validados, registrados e pulados, sem derrubar o lote.
+- [ ] Falhas transitórias têm retry com limite e timeout; falha definitiva gera alerta ao dono.
+- [ ] O log não guarda dado pessoal; só os campos necessários trafegam (sem `includeOtherFields` desnecessário).
+- [ ] Nós e variáveis com nomes claros no padrão do time.
 - [ ] PDD e SDD entregues e revisados pelo CoE; dono/sustentação definido.
-- [ ] Aprovado no `review/checklist-revisao-coe.md` em **todos** os itens.
+- [ ] Aprovado no **Checklist de revisão do CoE** em **todos** os itens (feito pelo revisor).
 
 ## 10. Riscos e dependências
 
-- **Segredos expostos** em fluxo versionado (chave `sk_live_…`, senha de banco): risco de vazamento — rotacionar.
+- **Segredos expostos** em fluxo versionado (chave `sk_live_…`, senha de banco): risco de vazamento — rotacionar. O prefixo `sk_live_` sugere chave de **produção** **[A CONFIRMAR]**.
+- **Todos os campos da API ficam no histórico de execuções**: com `includeOtherFields` ativo, qualquer campo devolvido (possivelmente CPF, contato) segue pelo fluxo e é gravado pelo n8n, sem política de retenção.
+- **Sucesso falso**: o marcador final `x = "ok"` não confere a resposta do POST.
+- **Nomenclatura genérica** (`node`, `dados`, `fazer`, `HTTP Request1/2`) e sem README/SDD: dificulta manutenção.
+- **Gatilho manual**: uma execução esquecida ou repetida manualmente agrava o risco de duplicidade.
 - **Duplicidade de registros** em reexecução ou falha parcial (POST sem chave de idempotência).
 - **Violação de LGPD** por dados pessoais em execuções/logs sem política de retenção.
-- **Sem dono** definido para sustentação.
+- **Sem dono** definido para sustentação: ninguém é acionado em caso de falha ou rotação de chave.
 - Dependência: disponibilidade e contrato (campos, autenticação, limites) da API da cooperativa.
 
 ---
